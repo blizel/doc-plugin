@@ -10,7 +10,10 @@
   "plugins": [
     {
       "name": "doc",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "blizel/doc-plugin"
+      },
       "description": "Capture, refine, plan, execute, and maintain loop for markdown vaults.",
       "version": "1.0.0"
     }

@@ -1,0 +1,18 @@
+{
+  "name": "blizel-doc-plugin",
+  "owner": {
+    "name": "blizel"
+  },
+  "metadata": {
+    "description": "Document lifecycle skills for Obsidian and markdown vaults.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "doc",
+      "source": ".",
+      "description": "Capture, refine, plan, execute, and maintain loop for markdown vaults.",
+      "version": "1.0.0"
+    }
+  ]
+}

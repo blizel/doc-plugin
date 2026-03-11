@@ -1,0 +1,13 @@
+{
+  "name": "doc",
+  "version": "1.0.0",
+  "description": "Document lifecycle skills for Obsidian and markdown vaults — capture, refine, plan, execute, maintain.",
+  "author": {
+    "name": "blizel",
+    "url": "https://github.com/blizel"
+  },
+  "repository": "https://github.com/blizel/doc-plugin",
+  "license": "MIT",
+  "keywords": ["obsidian", "vault", "documents", "knowledge-management", "markdown"],
+  "hooks": "./hooks.json"
+}

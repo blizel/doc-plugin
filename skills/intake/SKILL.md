@@ -4,7 +4,7 @@ description: "capture ideas/tasks/notes into vault"
 argument-hint: <ideas>
 ---
 
-!`cat vault-context.md`
+!`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`
 
 # Idea Intake
 

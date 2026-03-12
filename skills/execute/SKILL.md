@@ -4,7 +4,7 @@ description: "start/resume/wrap work session on a project"
 argument-hint: <project-name-or-search-term>
 ---
 
-!`cat vault-context.md`
+!`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`
 
 # Execute Vault Project Work
 

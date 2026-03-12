@@ -4,7 +4,7 @@ description: "find vault docs by keyword/tag/status/type"
 argument-hint: <search-query>
 ---
 
-!`cat vault-context.md`
+!`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`
 
 # Search the Vault
 

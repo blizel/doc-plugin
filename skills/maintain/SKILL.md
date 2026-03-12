@@ -4,7 +4,7 @@ description: "vault hygiene, debug critique, or restructure layout"
 argument-hint: <path|debug|restructure>
 ---
 
-!`cat vault-context.md`
+!`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`
 
 # Vault Maintenance
 

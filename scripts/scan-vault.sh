@@ -40,8 +40,11 @@ if [[ -n "$SCOPE" ]] && [[ "$SCOPE" != "." ]]; then
   fi
 fi
 
-# Collect all markdown files
-mapfile -t ALL_FILES < <(find "$SCAN_ROOT" -name "*.md" "${FIND_ARGS[@]}" -type f 2>/dev/null | sort)
+# Collect all markdown files (portable — no mapfile)
+ALL_FILES=()
+while IFS= read -r f; do
+  ALL_FILES+=("$f")
+done < <(find "$SCAN_ROOT" -name "*.md" "${FIND_ARGS[@]}" -type f 2>/dev/null | sort)
 TOTAL=${#ALL_FILES[@]}
 
 if [[ $TOTAL -eq 0 ]]; then
@@ -51,13 +54,25 @@ if [[ $TOTAL -eq 0 ]]; then
   exit 1
 fi
 
-# Build filename index for wikilink checking (lowercase basename → 1)
-declare -A FILE_INDEX
+# Build filename index for wikilink checking (temp file, one lowercase name per line)
+FILE_INDEX_TMP=$(mktemp)
+trap 'rm -f "$FILE_INDEX_TMP"' EXIT
 for f in "${ALL_FILES[@]}"; do
-  name=$(basename "$f" .md)
-  lower="${name,,}"
-  FILE_INDEX["$lower"]=1
-done
+  basename "$f" .md | tr '[:upper:]' '[:lower:]'
+done | sort -u > "$FILE_INDEX_TMP"
+
+# Portable lowercase helper
+to_lower() { echo "$1" | tr '[:upper:]' '[:lower:]'; }
+
+# Portable date-to-epoch (works on both GNU and BSD/macOS)
+date_to_epoch() {
+  local d="$1"
+  # GNU date
+  date -d "$d" +%s 2>/dev/null && return
+  # BSD/macOS date
+  date -j -f "%Y-%m-%d" "$d" +%s 2>/dev/null && return
+  echo 0
+}
 
 # Read directory map for location-type checking
 DIR_MAP=$(parse_section "$VAULT_CTX" "Directory Map")
@@ -111,7 +126,7 @@ for filepath in "${ALL_FILES[@]}"; do
 
   # Stale active items
   if [[ -n "$UPDATED" ]] && [[ "$STATUS" =~ ^(doing|active)$ ]]; then
-    UPDATED_EPOCH=$(date -d "$UPDATED" +%s 2>/dev/null || echo 0)
+    UPDATED_EPOCH=$(date_to_epoch "$UPDATED")
     if (( UPDATED_EPOCH > 0 && (TODAY_EPOCH - UPDATED_EPOCH) > NINETY_DAYS )); then
       WARNINGS+=("$REL_PATH: status '$STATUS' but last updated $UPDATED (90+ days ago)")
     fi
@@ -165,8 +180,8 @@ for filepath in "${ALL_FILES[@]}"; do
   LINKS=$(grep -oE '\[\[[^]|]+' "$filepath" 2>/dev/null | sed 's/\[\[//' | sed 's/#.*//' | sort -u || true)
   while IFS= read -r link; do
     [[ -z "$link" ]] && continue
-    lower="${link,,}"
-    [[ -z "${FILE_INDEX[$lower]:-}" ]] && WARNINGS+=("$REL_PATH: broken wikilink [[${link}]]")
+    lower=$(to_lower "$link")
+    grep -qx "$lower" "$FILE_INDEX_TMP" || WARNINGS+=("$REL_PATH: broken wikilink [[${link}]]")
   done <<< "$LINKS"
 
 done

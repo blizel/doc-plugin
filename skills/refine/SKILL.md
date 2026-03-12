@@ -4,7 +4,7 @@ description: "brainstorm and redesign rough/incomplete docs"
 argument-hint: <doc-path-or-search-term>
 ---
 
-!`cat vault-context.md`
+!`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`
 
 # Refine a Vault Document
 

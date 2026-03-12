@@ -4,7 +4,7 @@ description: "break project into phased task checklists"
 argument-hint: <project-path-or-search-term>
 ---
 
-!`cat vault-context.md`
+!`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`
 
 # Plan a Vault Project
 

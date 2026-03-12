@@ -5,29 +5,51 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/lib.sh"
+if ! source "$SCRIPT_DIR/lib.sh" 2>/dev/null; then
+  echo "ERROR: Failed to source lib.sh from $SCRIPT_DIR" >&2
+  exit 1
+fi
 
 SCOPE="${1:-.}"
 
-VAULT_CTX=$(find_vault_context "$SCOPE") || { echo "ERROR: vault-context.md not found"; exit 1; }
+VAULT_CTX=$(find_vault_context "$SCOPE") || { echo "ERROR: vault-context.md not found — searched upward from '$SCOPE'" >&2; exit 1; }
 VAULT_ROOT=$(vault_root "$VAULT_CTX")
 
-# Build find exclusions
+if [[ ! -d "$VAULT_ROOT" ]]; then
+  echo "ERROR: Vault root directory does not exist: $VAULT_ROOT" >&2
+  exit 1
+fi
+
+# Build find exclusions — anchor to vault root, not substring
 EXCLUDED=$(parse_section "$VAULT_CTX" "Excluded Directories" | sed 's/^- //' | sed 's|/$||')
 FIND_ARGS=()
 while IFS= read -r exc; do
-  [[ -n "$exc" ]] && FIND_ARGS+=(-not -path "*/${exc}/*")
+  [[ -n "$exc" ]] && FIND_ARGS+=(-not -path "${VAULT_ROOT}/${exc}/*")
 done <<< "$EXCLUDED"
 
 # Determine scan root
 SCAN_ROOT="$VAULT_ROOT"
-[[ -d "$SCOPE" ]] && SCAN_ROOT="$SCOPE"
+if [[ -n "$SCOPE" ]] && [[ "$SCOPE" != "." ]]; then
+  if [[ -d "$SCOPE" ]]; then
+    SCAN_ROOT="$SCOPE"
+  elif [[ -d "${VAULT_ROOT}/${SCOPE}" ]]; then
+    SCAN_ROOT="${VAULT_ROOT}/${SCOPE}"
+  else
+    echo "ERROR: Scope path not found: '$SCOPE' (tried absolute and relative to vault root)" >&2
+    exit 1
+  fi
+fi
 
 # Collect all markdown files
 mapfile -t ALL_FILES < <(find "$SCAN_ROOT" -name "*.md" "${FIND_ARGS[@]}" -type f 2>/dev/null | sort)
 TOTAL=${#ALL_FILES[@]}
 
-[[ $TOTAL -eq 0 ]] && { echo "No markdown files found."; exit 0; }
+if [[ $TOTAL -eq 0 ]]; then
+  echo "ERROR: No markdown files found in $SCAN_ROOT" >&2
+  echo "  Vault root: $VAULT_ROOT" >&2
+  echo "  Excluded: $(echo "$EXCLUDED" | tr '\n' ', ')" >&2
+  exit 1
+fi
 
 # Build filename index for wikilink checking (lowercase basename → 1)
 declare -A FILE_INDEX
@@ -36,6 +58,9 @@ for f in "${ALL_FILES[@]}"; do
   lower="${name,,}"
   FILE_INDEX["$lower"]=1
 done
+
+# Read directory map for location-type checking
+DIR_MAP=$(parse_section "$VAULT_CTX" "Directory Map")
 
 # Read conventions
 NAMING=$(parse_section "$VAULT_CTX" "Naming Conventions")
@@ -99,21 +124,39 @@ for filepath in "${ALL_FILES[@]}"; do
   fi
   [[ -z "$TAGS_LINE" ]] && SUGGESTIONS+=("$REL_PATH: no tags")
 
-  # Location vs type
+  # Location vs type — check against Directory Map from vault context
   if [[ -n "$TYPE" ]]; then
-    case "$TYPE" in
-      task)      echo "$REL_PATH" | grep -q "^tasks/"      || ERRORS+=("$REL_PATH: type '$TYPE' doesn't match location") ;;
-      project)   echo "$REL_PATH" | grep -q "^projects/"   || ERRORS+=("$REL_PATH: type '$TYPE' doesn't match location") ;;
-      knowledge) echo "$REL_PATH" | grep -q "^knowledge/"  || ERRORS+=("$REL_PATH: type '$TYPE' doesn't match location") ;;
-      writing)   echo "$REL_PATH" | grep -q "^writing/"    || ERRORS+=("$REL_PATH: type '$TYPE' doesn't match location") ;;
-      horizon)   echo "$REL_PATH" | grep -q "^odyssey/"    || ERRORS+=("$REL_PATH: type '$TYPE' doesn't match location") ;;
-    esac
+    LOCATION_MATCH=false
+    while IFS= read -r mapline; do
+      [[ -z "$mapline" ]] && continue
+      map_key=$(echo "$mapline" | sed 's/:.*//' | xargs)
+      map_dir=$(echo "$mapline" | sed 's/[^:]*: *//' | xargs)
+      # Check if this map entry's key contains the type name (e.g., tasks→task, projects→project)
+      TYPE_SINGULAR="${TYPE}"
+      if [[ "$map_key" == *"${TYPE_SINGULAR}"* ]] || [[ "$map_key" == *"${TYPE_SINGULAR}s"* ]]; then
+        if echo "$REL_PATH" | grep -q "^${map_dir}"; then
+          LOCATION_MATCH=true
+          break
+        fi
+      fi
+    done <<< "$DIR_MAP"
+    if [[ "$LOCATION_MATCH" == "false" ]] && [[ "$TYPE" != "daily" ]] && [[ "$TYPE" != "log" ]]; then
+      ERRORS+=("$REL_PATH: type '$TYPE' doesn't match any directory in Directory Map")
+    fi
   fi
 
-  # Naming convention
+  # Naming convention — check overrides from Naming Conventions section
   CONVENTION="$DEFAULT_NAMING"
-  echo "$REL_PATH" | grep -q "^tasks/" && [[ -n "$TASKS_NAMING" ]] && CONVENTION="$TASKS_NAMING"
-  echo "$REL_PATH" | grep -q "^writing/" && [[ -n "$WRITING_NAMING" ]] && CONVENTION="$WRITING_NAMING"
+  while IFS= read -r nameline; do
+    [[ -z "$nameline" ]] && continue
+    [[ "$nameline" == default:* ]] && continue
+    name_key=$(echo "$nameline" | sed 's/:.*//' | xargs)
+    name_val=$(echo "$nameline" | sed 's/[^:]*: *//' | xargs)
+    # Match if the rel path starts with a directory that matches this naming key
+    if echo "$REL_PATH" | grep -q "^${name_key}"; then
+      CONVENTION="$name_val"
+    fi
+  done <<< "$NAMING"
   if [[ "$CONVENTION" == "kebab-case" ]]; then
     echo "$FILENAME" | grep -qE '[A-Z _]' && WARNINGS+=("$REL_PATH: filename should be kebab-case")
   fi

@@ -16,10 +16,10 @@ VAULT_CTX=$(find_vault_context "$FILE_PATH") || exit 0
 VAULT_ROOT=$(vault_root "$VAULT_CTX")
 REL_PATH="${FILE_PATH#$VAULT_ROOT/}"
 
-# Skip excluded directories
-EXCLUDED=$(parse_section "$VAULT_CTX" "Excluded Directories" | sed 's/^- //')
+# Skip excluded directories (match from vault root, strip trailing slash for comparison)
+EXCLUDED=$(parse_section "$VAULT_CTX" "Excluded Directories" | sed 's/^- //' | sed 's|/$||')
 while IFS= read -r exc; do
-  [[ -n "$exc" ]] && [[ "$REL_PATH" == ${exc}* ]] && exit 0
+  [[ -n "$exc" ]] && [[ "$REL_PATH" == ${exc}/* ]] && exit 0
 done <<< "$EXCLUDED"
 
 ISSUES=()
@@ -60,18 +60,23 @@ else
     echo "$TAGS_LINE" | grep -q '_' && ISSUES+=("WARNING: Tags contain underscores — use hyphens")
   fi
 
-  # Location vs type
-  if [[ -n "$TYPE" ]]; then
-    LOCATION_OK=true
-    case "$TYPE" in
-      task)      echo "$REL_PATH" | grep -q "^tasks/"      || LOCATION_OK=false ;;
-      project)   echo "$REL_PATH" | grep -q "^projects/"   || LOCATION_OK=false ;;
-      knowledge) echo "$REL_PATH" | grep -q "^knowledge/"  || LOCATION_OK=false ;;
-      writing)   echo "$REL_PATH" | grep -q "^writing/"    || LOCATION_OK=false ;;
-      horizon)   echo "$REL_PATH" | grep -q "^odyssey/"    || LOCATION_OK=false ;;
-      log|daily) ;; # flexible location
-    esac
-    [[ "$LOCATION_OK" == "false" ]] && ISSUES+=("WARNING: type '$TYPE' doesn't match directory location")
+  # Location vs type — check against Directory Map from vault context
+  if [[ -n "$TYPE" ]] && [[ "$TYPE" != "daily" ]] && [[ "$TYPE" != "log" ]]; then
+    DIR_MAP=$(parse_section "$VAULT_CTX" "Directory Map")
+    LOCATION_OK=false
+    while IFS= read -r mapline; do
+      [[ -z "$mapline" ]] && continue
+      map_key=$(echo "$mapline" | sed 's/:.*//' | xargs)
+      map_dir=$(echo "$mapline" | sed 's/[^:]*: *//' | xargs)
+      TYPE_SINGULAR="${TYPE}"
+      if [[ "$map_key" == *"${TYPE_SINGULAR}"* ]] || [[ "$map_key" == *"${TYPE_SINGULAR}s"* ]]; then
+        if echo "$REL_PATH" | grep -q "^${map_dir}"; then
+          LOCATION_OK=true
+          break
+        fi
+      fi
+    done <<< "$DIR_MAP"
+    [[ "$LOCATION_OK" == "false" ]] && ISSUES+=("WARNING: type '$TYPE' doesn't match any directory in Directory Map")
   fi
 fi
 

@@ -1,6 +1,6 @@
 ---
 name: search
-description: "Use when looking for existing vault documents by keywords, tags, status, or type."
+description: "find vault docs by keyword/tag/status/type"
 argument-hint: <search-query>
 ---
 
@@ -8,67 +8,34 @@ argument-hint: <search-query>
 
 # Search the Vault
 
-Find existing documents by keywords, tags, status, or type. Uses the vault root and directory map from vault context above.
+Find documents by keywords, tags, status, or type using vault root and directory map from vault context above.
 
 ## Process
 
 ### 1. Parse the query
 
 Extract from `$ARGUMENTS`:
-- **Keywords** — free text to match against filenames, titles, and content
-- **Filters** (if provided with `--` prefix):
-  - `--tag <tag>` — match frontmatter `tags` field
-  - `--status <status>` — match frontmatter `status` field
-  - `--type <type>` — match frontmatter `type` field (task, project, knowledge, writing, daily, horizon)
-  - `--all` — include completed and archived items (excluded by default)
-- If no `--` flags, treat the entire argument as keywords
+- **Keywords** — free text to match against filenames, titles, content
+- **Filters** (`--tag`, `--status`, `--type`, `--all` to include completed/archived)
+- No `--` flags → treat entire argument as keywords
 
-### 2. Search
+### 2. Search (run in parallel)
 
-Run these in parallel using Glob and Grep:
+- **Glob** `**/*keyword*.md` across vault directories
+- **Grep** keywords in `tags:`, `title:`, `project:` frontmatter lines
+- **Grep** keywords in file bodies
+- Apply filters if provided
+- Skip Excluded Directories from vault context
+- Exclude completed/done/archived/shipped by default unless `--all`
 
-**Filename matching:**
-- Glob for `**/*keyword*.md` across all vault directories from vault context
+### 3. Present
 
-**Frontmatter matching:**
-- Grep for keywords in `tags:`, `title:`, and `project:` lines
-- If `--tag` filter: Grep for the exact tag value
-- If `--status` filter: Grep for `status: <value>`
-- If `--type` filter: Grep for `type: <value>`
+Deduplicate, rank by match count, cap at 15. Read each match to extract title, type, status, tags, first content line.
 
-**Content matching:**
-- Grep for keywords in file bodies
-
-**Always exclude:** directories listed in the Excluded Directories section of vault context
-**Exclude by default (unless `--all`):** completed/done and archived/shipped directories
-
-### 3. Rank and present
-
-Deduplicate results. Files matching in multiple strategies rank higher. Cap at 15 results.
-
-For each match, read the file to extract:
-- **Path** (relative to vault root)
-- **Title** (from frontmatter)
-- **Type** and **Status** (from frontmatter)
-- **Tags** (from frontmatter)
-- **Summary** (first non-empty line after frontmatter, or first heading)
-
-Present as a table:
-
-```
 | # | Path | Title | Type | Status | Tags |
 |---|------|-------|------|--------|------|
-```
-
-With one-line summaries below.
 
 ### 4. Follow-up
 
-If the user asks for more detail on a result, read and present the full file.
-
-## No Results
-
-If nothing matches:
-- Suggest broader keywords
-- Offer `--all` to include completed/archived items
-- Offer `/doc:intake` if the user wants to create something new
+- Detail on a result → read and present full file
+- No results → suggest broader keywords, `--all`, or `/doc:intake`

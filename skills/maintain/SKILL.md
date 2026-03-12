@@ -4,7 +4,7 @@ description: "vault hygiene, debug critique, or restructure layout"
 argument-hint: <path|debug|restructure>
 ---
 
-!`cat vault-context.md 2>/dev/null || echo "vault-context.md not found in current directory. Copy the template from ${CLAUDE_PLUGIN_ROOT}/vault-context.md to your vault root and configure it."`
+!`cat vault-context.md`
 
 # Vault Maintenance
 
@@ -25,13 +25,19 @@ Always skip Excluded Directories from vault context.
 
 ### 1. Run the scanner
 
-Run via Bash as a standalone command (no `||` or compound operators):
+Extract a **path scope** from `$ARGUMENTS` if one was provided (a file or directory path only — NOT the full user message). If `$ARGUMENTS` is natural language or a mode keyword (debug, restructure), do not pass it to the scanner.
+
+Run via Bash as a standalone command (no `||`, `&&`, or compound operators):
 
 ```
-${CLAUDE_PLUGIN_ROOT}/scripts/scan-vault.sh $ARGUMENTS
+# Full vault scan (no args or natural language input):
+${CLAUDE_PLUGIN_ROOT}/scripts/scan-vault.sh
+
+# Scoped to a specific path:
+${CLAUDE_PLUGIN_ROOT}/scripts/scan-vault.sh <extracted-path>
 ```
 
-If scanner fails: do NOT stop. Report the error, proceed to step 2.
+Never pass raw user input as shell arguments. If scanner fails: do NOT stop. Report the error, proceed to step 2.
 
 ### 2. Manual fallback (if scanner failed)
 

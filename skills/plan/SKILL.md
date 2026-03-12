@@ -4,7 +4,7 @@ description: "break project into phased task checklists"
 argument-hint: <project-path-or-search-term>
 ---
 
-!`cat vault-context.md 2>/dev/null || echo "vault-context.md not found in current directory. Copy the template from ${CLAUDE_PLUGIN_ROOT}/vault-context.md to your vault root and configure it."`
+!`cat vault-context.md`
 
 # Plan a Vault Project
 

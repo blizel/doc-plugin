@@ -4,7 +4,7 @@ description: "capture ideas/tasks/notes into vault"
 argument-hint: <ideas>
 ---
 
-!`cat vault-context.md 2>/dev/null || echo "vault-context.md not found in current directory. Copy the template from ${CLAUDE_PLUGIN_ROOT}/vault-context.md to your vault root and configure it."`
+!`cat vault-context.md`
 
 # Idea Intake
 

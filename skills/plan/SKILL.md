@@ -2,6 +2,7 @@
 name: plan
 description: "break project into phased task checklists"
 argument-hint: <project-path-or-search-term>
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
 !`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`

@@ -2,6 +2,7 @@
 name: refine
 description: "brainstorm and redesign rough/incomplete docs"
 argument-hint: <doc-path-or-search-term>
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
 !`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`

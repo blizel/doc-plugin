@@ -2,6 +2,7 @@
 name: execute
 description: "start/resume/wrap work session on a project"
 argument-hint: <project-name-or-search-term>
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
 !`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`

@@ -2,6 +2,7 @@
 name: intake
 description: "capture ideas/tasks/notes into vault"
 argument-hint: <ideas>
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
 !`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`

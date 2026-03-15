@@ -2,6 +2,7 @@
 name: maintain
 description: "vault hygiene, debug critique, or restructure layout"
 argument-hint: <path|debug|restructure>
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
 !`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`

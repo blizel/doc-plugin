@@ -2,6 +2,7 @@
 name: search
 description: "find vault docs by keyword/tag/status/type"
 argument-hint: <search-query>
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
 !`${CLAUDE_PLUGIN_ROOT}/scripts/find-vaults.sh`

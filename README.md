@@ -6,12 +6,12 @@ A Claude Code plugin that gives any Obsidian or markdown vault a complete docume
 
 | Skill | Command | Purpose |
 |---|---|---|
-| Intake | `/doc:intake` | Capture ideas, tasks, and reference material into your vault |
-| Search | `/doc:search` | Find documents by keyword, tag, status, or type |
-| Refine | `/doc:refine` | Brainstorm and design — turn rough notes into structured docs |
-| Plan | `/doc:plan` | Structure projects into phased implementation checklists |
-| Execute | `/doc:execute` | Work sessions with logging and knowledge doc sync |
-| Maintain | `/doc:maintain` | Hygiene scans and debug mode for vault self-critique |
+| Intake | `/doc:intake` | Fast capture — classifies input and places it in the right directory with frontmatter |
+| Search | `/doc:search` | Find docs by keyword, tag, status, or type; excludes archived by default |
+| Refine | `/doc:refine` | Guided brainstorming — asks questions, proposes approaches, then writes on approval |
+| Plan | `/doc:plan` | Break a project into 2–4 phased task checklists with done conditions |
+| Execute | `/doc:execute` | Start/resume/wrap work sessions with log entries and knowledge doc sync |
+| Maintain | `/doc:maintain` | Hygiene scans, wikilink connection, restructuring, and debug critique mode |
 
 ## Installation
 
@@ -19,7 +19,7 @@ A Claude Code plugin that gives any Obsidian or markdown vault a complete docume
 
 ```
 /plugin marketplace add blizel/doc-plugin
-/plugin install doc@blizel-doc-plugin
+/plugin install doc@doc-vault
 ```
 
 ### Local development
@@ -36,11 +36,21 @@ claude --plugin-dir ./doc-plugin
 
 The plugin reads `vault-context.md` at runtime to understand your vault's layout. No hardcoded paths.
 
+## Hooks
+
+The plugin registers three PostToolUse hooks that run automatically after every `Write` or `Edit`:
+
+| Hook | Script | What it does |
+|---|---|---|
+| Auto-date | `auto-date.sh` | Bumps the `updated` frontmatter field to today's date |
+| Sync status | `sync-status.sh` | Sets the `status` field based on the file's directory |
+| Validate | `validate-file.sh` | Checks required frontmatter and naming conventions |
+
 ## Lifecycle Flow
 
 ```
 intake → refine → plan → execute → refine (iterate)
-                           ↘ maintain debug (when vault feels off)
+                           ↘ maintain (when vault feels off)
 ```
 
 Each skill suggests the natural next step when it completes.

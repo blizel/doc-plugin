@@ -30,7 +30,7 @@ Find note pairs sharing 2+ tags that aren't already wikilinked. Rank by shared t
 1. path/to/source.md (line 12): "backup procedures" → [[backup-procedures]]
 
 ## Related Notes (N suggestions)
-1. tasks/some-task.md ↔ knowledge/tech/some-ref.md
+1. tasks/some-task.md ↔ domains/infra/some-ref.md
    Shared tags: homelab, observability (2)
 ```
 

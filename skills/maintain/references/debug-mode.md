@@ -21,7 +21,7 @@ Be direct. Don't soften:
 - projects/backlog/old-idea.md — 6 months inactive, vague goal. Archive or delete?
 
 ## Contradictions
-- knowledge/tech/dns.md says X, but knowledge/tech/infra.md says Y
+- domains/infra/dns-domains.md says X, but domains/infra/infra.md says Y
 
 ## Stale
 - projects/active/big-project.md — last log 4 months ago, 2/12 tasks done

@@ -79,9 +79,9 @@ DIR_MAP=$(parse_section "$VAULT_CTX" "Directory Map")
 
 # Read conventions
 NAMING=$(parse_section "$VAULT_CTX" "Naming Conventions")
-DEFAULT_NAMING=$(echo "$NAMING" | grep "^default:" | sed 's/default: *//')
-TASKS_NAMING=$(echo "$NAMING" | grep "^tasks:" | sed 's/tasks: *//')
-WRITING_NAMING=$(echo "$NAMING" | grep "^writing:" | sed 's/writing: *//')
+DEFAULT_NAMING=$(echo "$NAMING" | grep "^default:" | sed 's/default: *//' || true)
+TASKS_NAMING=$(echo "$NAMING" | grep "^tasks:" | sed 's/tasks: *//' || true)
+WRITING_NAMING=$(echo "$NAMING" | grep "^writing:" | sed 's/writing: *//' || true)
 
 ERRORS=()
 WARNINGS=()
@@ -100,10 +100,10 @@ for filepath in "${ALL_FILES[@]}"; do
   fi
 
   FM=$(awk '/^---$/{n++;next} n==1{print} n>=2{exit}' "$filepath")
-  TYPE=$(echo "$FM" | grep "^type:" | head -1 | sed 's/type: *//' | tr -d '"'"'" | xargs)
-  STATUS=$(echo "$FM" | grep "^status:" | head -1 | sed 's/status: *//' | tr -d '"'"'" | xargs)
-  UPDATED=$(echo "$FM" | grep "^updated:" | head -1 | sed 's/updated: *//' | tr -d '"'"'" | xargs)
-  TAGS_LINE=$(echo "$FM" | grep "^tags:" | head -1)
+  TYPE=$(echo "$FM" | grep "^type:" | head -1 | sed 's/type: *//' | tr -d '"'"'" | xargs || true)
+  STATUS=$(echo "$FM" | grep "^status:" | head -1 | sed 's/status: *//' | tr -d '"'"'" | xargs || true)
+  UPDATED=$(echo "$FM" | grep "^updated:" | head -1 | sed 's/updated: *//' | tr -d '"'"'" | xargs || true)
+  TAGS_LINE=$(echo "$FM" | grep "^tags:" | head -1 || true)
 
   # Required fields
   [[ -z "$TYPE" ]] && ERRORS+=("$REL_PATH: missing 'type' field")
@@ -139,24 +139,19 @@ for filepath in "${ALL_FILES[@]}"; do
   fi
   [[ -z "$TAGS_LINE" ]] && SUGGESTIONS+=("$REL_PATH: no tags")
 
-  # Location vs type — check against Directory Map from vault context
+  # Location vs type — verify file is in a directory from the Directory Map
   if [[ -n "$TYPE" ]]; then
-    LOCATION_MATCH=false
+    IN_MAPPED_DIR=false
     while IFS= read -r mapline; do
       [[ -z "$mapline" ]] && continue
-      map_key=$(echo "$mapline" | sed 's/:.*//' | xargs)
       map_dir=$(echo "$mapline" | sed 's/[^:]*: *//' | xargs)
-      # Check if this map entry's key contains the type name (e.g., tasks→task, projects→project)
-      TYPE_SINGULAR="${TYPE}"
-      if [[ "$map_key" == *"${TYPE_SINGULAR}"* ]] || [[ "$map_key" == *"${TYPE_SINGULAR}s"* ]]; then
-        if echo "$REL_PATH" | grep -q "^${map_dir}"; then
-          LOCATION_MATCH=true
-          break
-        fi
+      if echo "$REL_PATH" | grep -q "^${map_dir}"; then
+        IN_MAPPED_DIR=true
+        break
       fi
     done <<< "$DIR_MAP"
-    if [[ "$LOCATION_MATCH" == "false" ]] && [[ "$TYPE" != "daily" ]] && [[ "$TYPE" != "log" ]]; then
-      ERRORS+=("$REL_PATH: type '$TYPE' doesn't match any directory in Directory Map")
+    if [[ "$IN_MAPPED_DIR" == "false" ]] && [[ "$TYPE" != "daily" ]] && [[ "$TYPE" != "log" ]]; then
+      WARNINGS+=("$REL_PATH: not in any directory from Directory Map")
     fi
   fi
 

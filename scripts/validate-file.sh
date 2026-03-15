@@ -86,7 +86,23 @@ NAMING=$(parse_section "$VAULT_CTX" "Naming Conventions")
 CONVENTION=$(echo "$NAMING" | grep "^default:" | sed 's/default: *//')
 
 # Directory-specific overrides
-if echo "$REL_PATH" | grep -q "^tasks/"; then
+# Files inside a project subfolder use sentence case (project_files convention)
+IN_PROJECT_FOLDER=false
+DIR_MAP=$(parse_section "$VAULT_CTX" "Directory Map")
+while IFS= read -r mapline; do
+  [[ -z "$mapline" ]] && continue
+  map_key=$(echo "$mapline" | sed 's/:.*//' | xargs)
+  map_dir=$(echo "$mapline" | sed 's/[^:]*: *//' | xargs)
+  if [[ "$map_key" == project* ]] && echo "$REL_PATH" | grep -qE "^${map_dir}[^/]+/"; then
+    IN_PROJECT_FOLDER=true
+    break
+  fi
+done <<< "$DIR_MAP"
+
+if [[ "$IN_PROJECT_FOLDER" == "true" ]]; then
+  PROJECT_FILES_CONV=$(echo "$NAMING" | grep "^project_files:" | sed 's/project_files: *//')
+  [[ -n "$PROJECT_FILES_CONV" ]] && CONVENTION="$PROJECT_FILES_CONV"
+elif echo "$REL_PATH" | grep -q "^tasks/"; then
   OVERRIDE=$(echo "$NAMING" | grep "^tasks:" | sed 's/tasks: *//')
   [[ -n "$OVERRIDE" ]] && CONVENTION="$OVERRIDE"
 elif echo "$REL_PATH" | grep -q "^writing/"; then
@@ -96,6 +112,9 @@ fi
 
 if [[ "$CONVENTION" == "kebab-case" ]]; then
   echo "$FILENAME" | grep -qE '[A-Z _]' && ISSUES+=("WARNING: Filename '$FILENAME' should be kebab-case")
+elif [[ "$CONVENTION" == sentence* ]]; then
+  # Sentence case: must start with uppercase, spaces allowed, no hyphens between words
+  echo "$FILENAME" | grep -qE '^[A-Z]' || ISSUES+=("WARNING: Filename '$FILENAME' should be sentence case (start with uppercase)")
 fi
 
 # --- Output ---

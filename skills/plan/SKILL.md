@@ -26,15 +26,23 @@ Identify discrete work items, map dependencies, note risks. Present 2-4 phases:
 
 Principles: each phase delivers independent value, front-load risk, keep phases session-sized, tasks must be concrete and verifiable.
 
-### 3. Write on approval
+### 3. Evaluate phase docs
 
-Write into the project doc under `## Tasks`:
+If a phase is substantial enough to be its own body of work (multiple sub-tasks, its own context/decisions, would benefit from independent tracking), propose splitting it into a separate phase doc: `<Title> Phase N - Name.md` in the project folder. Phase docs mention blocking dependencies on other phases in their content.
+
+Lightweight phases stay inline in the project overview.
+
+### 4. Write on approval
+
+Write into the project overview under `## Tasks`:
 
 ```markdown
 ### Phase 1 — [Name]
 - [ ] Task one
 - [ ] Task two
 ```
+
+For substantial phases, create `<Title> Phase N - Name.md` with its own frontmatter (`type: project`, same tags as parent, links back to overview). The overview links to phase docs with `[[wikilinks]]`.
 
 Preserve already-checked items. Update `updated` date.
 

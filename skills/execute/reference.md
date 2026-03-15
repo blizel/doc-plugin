@@ -2,7 +2,7 @@
 
 ## Log File Format
 
-Each project gets one log file in its folder, named `<project-folder>-log.md` (e.g., `my-project/my-project-log.md`). Entries are reverse-chronological (newest first), free-form narrative under date headings.
+Each project gets one log file in its folder, named `<Title> Log.md` in sentence case (e.g., `my-project/My Project Log.md`). Entries are reverse-chronological (newest first), free-form narrative under date headings.
 
 ### Frontmatter
 
@@ -46,12 +46,12 @@ Before:
   projects/backlog/my-project.md
 
 After:
-  projects/backlog/my-project/my-project.md       (moved)
-  projects/backlog/my-project/my-project-log.md   (created)
+  projects/backlog/my-project/My Project Overview.md   (moved + renamed)
+  projects/backlog/my-project/My Project Log.md         (created)
 ```
 
 Steps:
-1. Create the project folder: `mkdir -p <project-dir>/<project-name>/`
-2. Move the project file into it — filename stays the same as the folder
-3. Create `<project-name>-log.md` with frontmatter
+1. Create the project folder: `mkdir -p <project-dir>/<kebab-name>/`
+2. Move the project file into it, renaming to `<Title> Overview.md` (sentence case)
+3. Create `<Title> Log.md` with frontmatter
 4. Wikilinks don't need updating if the vault editor resolves by filename (Obsidian does)

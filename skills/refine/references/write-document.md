@@ -50,10 +50,14 @@ Add `[[wikilinks]]` to all related docs identified during brainstorming.
 **Type promotion:** If the plan calls for changing the doc type (e.g., task → project), build the new frontmatter for the target type, migrate content, propose the new file path per vault context conventions.
 
 **Folder promotion:** If a project needs multiple artifacts, promote to project folder:
-- Main project doc as `<folder-name>.md`
-- Subdirectories for artifacts
+- Main project doc as `<Title> Overview.md` (sentence case)
+- Log file as `<Title> Log.md`
+- Phase docs as `<Title> Phase N - Name.md` when phases are substantial enough to be their own body of work
+- Subdirectories for other artifacts
 - Move existing related docs into the folder
 - Update wikilinks in referencing docs
+
+The folder name stays kebab-case. All `.md` files inside use sentence case prefixed with the project title.
 
 ### 4. Present diff
 

@@ -36,12 +36,13 @@ schemas: _system/schemas/
 
 ## Naming Conventions
 
-How files should be named in each area.
+How files should be named in each area. Project folders use kebab-case. Files inside project folders use sentence case prefixed with the project title (e.g., `My Project Overview.md`, `My Project Log.md`, `My Project Phase 1 - Setup.md`).
 
 ```
 default: kebab-case
 tasks: prose with spaces
 writing: prose with spaces
+project_files: sentence case with project title prefix
 ```
 
 ## Status Map

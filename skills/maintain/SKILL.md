@@ -1,7 +1,7 @@
 ---
 name: maintain
-description: "vault hygiene, debug critique, or restructure layout"
-argument-hint: <path|debug|restructure>
+description: "vault hygiene, debug critique, connect links, or restructure layout"
+argument-hint: <path|debug|connect|restructure>
 allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/*)
 ---
 
@@ -15,6 +15,7 @@ Scan for quality issues and fix them. Non-destructive — always previews before
 
 From `$ARGUMENTS`:
 - Contains "restructure" → read `${CLAUDE_SKILL_DIR}/references/restructure-mode.md` and follow it
+- Contains "connect" → read `${CLAUDE_SKILL_DIR}/references/connect-mode.md` and follow it
 - Contains "debug" → run hygiene first, then read `${CLAUDE_SKILL_DIR}/references/debug-mode.md`
 - File path → single file check
 - Directory path → scope to that directory

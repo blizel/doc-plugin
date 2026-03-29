@@ -37,21 +37,6 @@ Left off: search working but needs tests. Rate limiting needs re-enabling.
 - Multiple entries on the same date: append under the existing date heading
 - New dates: insert above previous entries (reverse-chronological)
 
-## Single-File Project Promotion
+## Project Initialization
 
-Projects without a folder get promoted when the first log entry is written:
-
-```
-Before:
-  projects/backlog/my-project.md
-
-After:
-  projects/backlog/my-project/My Project Overview.md   (moved + renamed)
-  projects/backlog/my-project/My Project Log.md         (created)
-```
-
-Steps:
-1. Create the project folder: `mkdir -p <project-dir>/<kebab-name>/`
-2. Move the project file into it, renaming to `<Title> Overview.md` (sentence case)
-3. Create `<Title> Log.md` with frontmatter
-4. Wikilinks don't need updating if the vault editor resolves by filename (Obsidian does)
+Project folder structure (promotion from single-file, overview, phase docs, log) is created by `/doc:plan`. Execute expects an initialized project folder. If execute encounters a single-file project, it redirects to `/doc:plan`.

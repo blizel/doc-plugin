@@ -32,19 +32,29 @@ If a phase is substantial enough to be its own body of work (multiple sub-tasks,
 
 Lightweight phases stay inline in the project overview.
 
-### 4. Write on approval
+### 4. Write on approval — initialize the project
 
-Write into the project overview under `## Tasks`:
+On approval, scaffold the full project structure:
 
-```markdown
-### Phase 1 — [Name]
-- [ ] Task one
-- [ ] Task two
-```
+1. **Promote to folder** (if single-file):
+   - Create `<project-dir>/<kebab-name>/`
+   - Move the project file in, renaming to `<Title> Overview.md` (sentence case)
 
-For substantial phases, create `<Title> Phase N - Name.md` with its own frontmatter (`type: project`, same tags as parent, links back to overview). The overview links to phase docs with `[[wikilinks]]`.
+2. **Write the overview** with phases under `## Tasks`:
+
+   ```markdown
+   ### Phase 1 — [Name]
+   - [ ] Task one
+   - [ ] Task two
+   ```
+
+3. **Create phase docs** for substantial phases: `<Title> Phase N - Name.md` with its own frontmatter (`type: project`, same tags as parent, links back to overview). The overview links to phase docs with `[[wikilinks]]`.
+
+4. **Create the log file**: `<Title> Log.md` with frontmatter (see execute skill's reference for format).
 
 Preserve already-checked items. Update `updated` date.
+
+The project is now initialized and ready to browse in Obsidian before any work begins.
 
 **Next step:** Suggest `/doc:execute` to start working.
 

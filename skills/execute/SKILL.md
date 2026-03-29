@@ -19,9 +19,9 @@ Glob/Grep across project directories from vault context. Read the project doc an
 
 ### 2. Open session
 
+- If the project is still a single file (no folder, no log), stop and suggest `/doc:plan` to initialize it first
 - Set status to `active` (if paused/backlog), bump `updated` date
 - Write opening log entry: what we're picking up, goal for this session
-- Single-file projects: promote to folder first (see `${CLAUDE_SKILL_DIR}/reference.md`)
 
 ### 3. Work loop
 

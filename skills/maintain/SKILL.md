@@ -55,7 +55,15 @@ Scanner output is grouped by severity (Errors, Warnings, Suggestions). Present i
 
 ### 4. Apply on approval
 
-Edit each file, update `updated` dates, show summary.
+For date/status frontmatter fixes, run the batch fixer first (handles all date stamps and status sync in one pass):
+
+```
+$VAULT_ROOT/_system/scripts/fix-frontmatter.sh --batch $VAULT_ROOT
+```
+
+For remaining fixes (missing fields, naming, structural issues), edit each file individually. Show summary when done.
+
+Note: A systemd watcher (`vault-frontmatter.service` on Pi) runs `fix-frontmatter.sh` on every file write in real time. The batch run here is a backup for anything the watcher missed.
 
 ## Rules
 
